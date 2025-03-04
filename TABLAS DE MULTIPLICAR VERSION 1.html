@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Tablas de Multiplicar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen bg-blue-200 text-center">
+    <div class="bg-white p-6 rounded-2xl shadow-lg w-80 text-lg">
+        <h1 class="text-2xl font-bold text-blue-600">Tablas de Multiplicar ✨</h1>
+        <p id="multiplicacion" class="text-xl my-4 font-semibold"></p>
+        <input id="respuesta" type="number" class="border p-2 w-full rounded-lg text-center" placeholder="Tu respuesta">
+        <button onclick="verificarRespuesta()" class="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700">Responder</button>
+        <p id="mensaje" class="text-lg mt-4 font-bold"></p>
+        <p class="mt-4">✅ Aciertos: <span id="aciertos">0</span> | ❌ Errores: <span id="errores">0</span></p>
+        <button onclick="reiniciarJuego()" class="mt-4 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-700">Reiniciar</button>
+    </div>
+    <audio id="correcto" src="https://www.fesliyanstudios.com/play-mp3/4386"></audio>
+    <audio id="incorrecto" src="https://www.fesliyanstudios.com/play-mp3/4387"></audio>
+    <script>
+        let num1, num2, respuestaCorrecta;
+        let aciertos = 0, errores = 0;
+        
+        function generarEjercicio() {
+            num1 = Math.floor(Math.random() * 9) + 1;
+            num2 = Math.floor(Math.random() * 9) + 1;
+            respuestaCorrecta = num1 * num2;
+            document.getElementById("multiplicacion").textContent = `${num1} × ${num2} = ?`;
+        }
+        
+        function verificarRespuesta() {
+            let respuestaUsuario = parseInt(document.getElementById("respuesta").value);
+            let mensaje = document.getElementById("mensaje");
+            let sonido;
+            
+            if (respuestaUsuario === respuestaCorrecta) {
+                mensaje.textContent = "¡Bien hecho! 🎉";
+                mensaje.className = "text-green-600";
+                aciertos++;
+                sonido = document.getElementById("correcto");
+            } else {
+                mensaje.textContent = "¡Inténtalo de nuevo! ❌";
+                mensaje.className = "text-red-600";
+                errores++;
+                sonido = document.getElementById("incorrecto");
+            }
+            
+            document.getElementById("aciertos").textContent = aciertos;
+            document.getElementById("errores").textContent = errores;
+            document.getElementById("respuesta").value = "";
+            sonido.play();
+            
+            setTimeout(generarEjercicio, 1000);
+        }
+        
+        function reiniciarJuego() {
+            aciertos = 0;
+            errores = 0;
+            document.getElementById("aciertos").textContent = aciertos;
+            document.getElementById("errores").textContent = errores;
+            document.getElementById("mensaje").textContent = "";
+            generarEjercicio();
+        }
+        
+        generarEjercicio();
+    </script>
+</body>
+</html>
