@@ -3,70 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Tablas de Multiplicar</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Generador de Contraseñas Seguras</title>
     <style>
-        .hidden { display: none; }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .password-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .options {
+            text-align: left;
+            margin: 10px 0;
+        }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen bg-blue-200 text-center">
-    <div class="bg-white p-6 rounded-2xl shadow-lg w-80 text-lg">
-        <h1 class="text-2xl font-bold text-blue-600">Tablas de Multiplicar ✨</h1>
-        <p id="multiplicacion" class="text-xl my-4 font-semibold"></p>
-        <input id="respuesta" type="number" class="border p-2 w-full rounded-lg text-center" placeholder="Tu respuesta">
-        <button onclick="verificarRespuesta()" class="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-700">Responder</button>
-        <p id="mensaje" class="text-lg mt-4 font-bold"></p>
-        <p class="mt-4">✅ Aciertos: <span id="aciertos">0</span> | ❌ Errores: <span id="errores">0</span></p>
-        <button onclick="reiniciarJuego()" class="mt-4 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-700">Reiniciar</button>
+<body>
+    <div class="container">
+        <h1>Generador de Contraseñas Seguras</h1>
+        <div class="password-container">
+            <input type="text" id="password" readonly>
+            <button id="copy-btn">📋</button>
+        </div>
+        <div class="options">
+            <label>Longitud: <span id="length-value">12</span></label>
+            <input type="range" id="length" min="8" max="32" value="12">
+            <label><input type="checkbox" id="uppercase" checked> Incluir mayúsculas</label>
+            <label><input type="checkbox" id="numbers" checked> Incluir números</label>
+            <label><input type="checkbox" id="symbols" checked> Incluir símbolos</label>
+        </div>
+        <button id="generate-btn">Generar Contraseña</button>
+        <p id="strength"></p>
     </div>
-    <audio id="correcto" src="https://www.fesliyanstudios.com/play-mp3/4386"></audio>
-    <audio id="incorrecto" src="https://www.fesliyanstudios.com/play-mp3/4387"></audio>
     <script>
-        let num1, num2, respuestaCorrecta;
-        let aciertos = 0, errores = 0;
-        
-        function generarEjercicio() {
-            num1 = Math.floor(Math.random() * 9) + 1;
-            num2 = Math.floor(Math.random() * 9) + 1;
-            respuestaCorrecta = num1 * num2;
-            document.getElementById("multiplicacion").textContent = `${num1} × ${num2} = ?`;
-        }
-        
-        function verificarRespuesta() {
-            let respuestaUsuario = parseInt(document.getElementById("respuesta").value);
-            let mensaje = document.getElementById("mensaje");
-            let sonido;
-            
-            if (respuestaUsuario === respuestaCorrecta) {
-                mensaje.textContent = "¡Bien hecho! 🎉";
-                mensaje.className = "text-green-600";
-                aciertos++;
-                sonido = document.getElementById("correcto");
-            } else {
-                mensaje.textContent = "¡Inténtalo de nuevo! ❌";
-                mensaje.className = "text-red-600";
-                errores++;
-                sonido = document.getElementById("incorrecto");
-            }
-            
-            document.getElementById("aciertos").textContent = aciertos;
-            document.getElementById("errores").textContent = errores;
-            document.getElementById("respuesta").value = "";
-            sonido.play();
-            
-            setTimeout(generarEjercicio, 1000);
-        }
-        
-        function reiniciarJuego() {
-            aciertos = 0;
-            errores = 0;
-            document.getElementById("aciertos").textContent = aciertos;
-            document.getElementById("errores").textContent = errores;
-            document.getElementById("mensaje").textContent = "";
-            generarEjercicio();
-        }
-        
-        generarEjercicio();
+        document.addEventListener("DOMContentLoaded", () => {
+            const passwordField = document.getElementById("password");
+            const copyBtn = document.getElementById("copy-btn");
+            const generateBtn = document.getElementById("generate-btn");
+            const lengthInput = document.getElementById("length");
+            const lengthValue = document.getElementById("length-value");
+            const uppercaseCheckbox = document.getElementById("uppercase");
+            const numbersCheckbox = document.getElementById("numbers");
+            const symbolsCheckbox = document.getElementById("symbols");
+            const strengthIndicator = document.getElementById("strength");
+
+            const generatePassword = () => {
+                const length = lengthInput.value;
+                let chars = "abcdefghijklmnopqrstuvwxyz";
+                if (uppercaseCheckbox.checked) chars += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                if (numbersCheckbox.checked) chars += "0123456789";
+                if (symbolsCheckbox.checked) chars += "!@#$%^&*()_-+=<>?/";
+                
+                let password = "";
+                const array = new Uint32Array(length);
+                window.crypto.getRandomValues(array);
+                for (let i = 0; i < length; i++) {
+                    password += chars[array[i] % chars.length];
+                }
+                
+                passwordField.value = password;
+                evaluateStrength(password);
+            };
+
+            const evaluateStrength = (password) => {
+                let score = 0;
+                if (password.length >= 12) score++;
+                if (/[A-Z]/.test(password)) score++;
+                if (/[0-9]/.test(password)) score++;
+                if (/[^a-zA-Z0-9]/.test(password)) score++;
+                
+                const levels = ["Débil", "Moderada", "Fuerte", "Muy Fuerte"];
+                strengthIndicator.textContent = `Fortaleza: ${levels[score]}`;
+            };
+
+            copyBtn.addEventListener("click", () => {
+                passwordField.select();
+                document.execCommand("copy");
+            });
+
+            generateBtn.addEventListener("click", generatePassword);
+            lengthInput.addEventListener("input", () => {
+                lengthValue.textContent = lengthInput.value;
+            });
+
+            generatePassword();
+        });
     </script>
 </body>
 </html>
